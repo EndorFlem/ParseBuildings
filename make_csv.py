@@ -18,6 +18,7 @@ csv_columns = {
     "objElemLivingCnt": "apartments",
     "objSquareLiving": "total_area",
     "objReady100PercDt": "completion_date",
+    "objPublDt": "start_date",
     "objGuarantyEscrowFlg": "escrow",
     "objProblemFlg": "problem_flag",
     "rpdNum": "rpd_number",

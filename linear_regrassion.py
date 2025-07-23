@@ -5,54 +5,88 @@ df_train = pd.read_csv("train.csv")
 df_valid = pd.read_csv("validation.csv")
 df_test = pd.read_csv("test.csv")
 
-
 # у некоторых (на самом деле большинства домов) рядом нет метро
 # так что я решил так заполнять пропуски , считая , что до метро идти очень далеко
 # P.S. проведя ещё пару тестов понял , что данный критерий лишь немного влияет на итоговый результат
-df_train["metro_time"] = df_train["metro_time"].fillna(45)
-df_valid["metro_time"] = df_valid["metro_time"].fillna(45)
-df_test["metro_time"] = df_test["metro_time"].fillna(45)
+for df in [df_train, df_valid, df_test]:
+    df["metro_time"] = df["metro_time"].fillna(60)
 
-features = [
-    "latitude",
-    # "longitude",
-    # "metro_time",
-    # "floors_min",
-    "floors_max",
-    # "apartments",
-    "total_area",
+categorical = [
+    "developer_group",
+    "region_num",
+    "address_code",
 ]
-X_train = df_train[features].values
-y_train = df_train["price_for_sqm"].values
+numerical = ["metro_time", "floors_max", "total_area"]
+target_col = "price_for_sqm"
 
-X_valid = df_valid[features].values
-y_valid = df_valid["price_for_sqm"].values
 
-X_test = df_test[features].values
-y_test = df_test["price_for_sqm"].values
+y_train = np.log1p(df_train[target_col])
+y_valid = np.log1p(df_valid[target_col])
+y_test = np.log1p(df_test[target_col])
 
-X_mean = X_train.mean(axis=0)
-X_std = X_train.std(axis=0)
+X_train_cat = pd.get_dummies(
+    df_train[categorical], columns=categorical, drop_first=True
+)
+X_valid_cat = pd.get_dummies(
+    df_valid[categorical], columns=categorical, drop_first=True
+)
+X_test_cat = pd.get_dummies(df_test[categorical], columns=categorical, drop_first=True)
 
-X_train_norm = (X_train - X_mean) / X_std
-X_valid_norm = (X_valid - X_mean) / X_std
-X_test_norm = (X_test - X_mean) / X_std
 
-X_train_scaled = np.hstack([np.ones((X_train_norm.shape[0], 1)), X_train_norm])
-X_valid_scaled = np.hstack([np.ones((X_valid_norm.shape[0], 1)), X_valid_norm])
-X_test_scaled = np.hstack([np.ones((X_test_norm.shape[0], 1)), X_test_norm])
+train_cols = X_train_cat.columns
+X_valid_cat = X_valid_cat.reindex(columns=train_cols, fill_value=0)
+X_test_cat = X_test_cat.reindex(columns=train_cols, fill_value=0)
 
-theta = np.linalg.inv(X_train_scaled.T @ X_train_scaled) @ (X_train_scaled.T @ y_train)
 
-y_train_pred = X_train_scaled @ theta
-y_valid_pred = X_valid_scaled @ theta
-y_test_pred = X_test_scaled @ theta
+X_train_num = df_train[numerical]
+X_valid_num = df_valid[numerical]
+X_test_num = df_test[numerical]
+
+
+X_mean = X_train_num.mean(axis=0)
+X_std = X_train_num.std(axis=0)
+
+
+X_train_num_scaled = (X_train_num - X_mean) / X_std
+X_valid_num_scaled = (X_valid_num - X_mean) / X_std
+X_test_num_scaled = (X_test_num - X_mean) / X_std
+
+
+X_train = pd.concat([X_train_num_scaled, X_train_cat], axis=1).astype(float).values
+X_valid = pd.concat([X_valid_num_scaled, X_valid_cat], axis=1).astype(float).values
+X_test = pd.concat([X_test_num_scaled, X_test_cat], axis=1).astype(float).values
+
+
+X_train_scaled = np.hstack([np.ones((X_train.shape[0], 1)), X_train])
+X_valid_scaled = np.hstack([np.ones((X_valid.shape[0], 1)), X_valid])
+X_test_scaled = np.hstack([np.ones((X_test.shape[0], 1)), X_test])
+
+
+I = np.eye(X_train_scaled.shape[1])
+I[0, 0] = 0
+alpha = 0.01
+theta = np.linalg.inv(X_train_scaled.T @ X_train_scaled + alpha * I) @ (
+    X_train_scaled.T @ y_train
+)
+
+y_train_pred_log = X_train_scaled @ theta
+y_valid_pred_log = X_valid_scaled @ theta
+y_test_pred_log = X_test_scaled @ theta
+
+
+y_train_pred = np.expm1(y_train_pred_log)
+y_valid_pred = np.expm1(y_valid_pred_log)
+y_test_pred = np.expm1(y_test_pred_log)
+
+y_train_true = np.expm1(y_train)
+y_valid_true = np.expm1(y_valid)
+y_test_true = np.expm1(y_test)
 
 
 def mape(y_true, y_pred):
     return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
 
 
-print(f"train mape: {mape(y_train, y_train_pred):.2f}%")
-print(f"validation mape: {mape(y_valid, y_valid_pred):.2f}%")
-print(f"test mape: {mape(y_test, y_test_pred):.2f}%")
+print(f"Train MAPE: {mape(y_train_true, y_train_pred):.2f}%")
+print(f"Validation MAPE: {mape(y_valid_true, y_valid_pred):.2f}%")
+print(f"Test MAPE: {mape(y_test_true, y_test_pred):.2f}%")

@@ -1,0 +1,63 @@
+[{
+  categorical = [
+    "region_num",
+    "building_class",
+    // # "metro",
+    "wall_material",
+    "finish_type_count",
+    // # "free_plan",
+    "developer_group",
+    // # "address_code",
+]
+numerical = [
+    "metro_time",
+    "floors_max",
+    // # "total_area",
+    "latitude",
+    "longitude",
+    // # "flats_count",
+    "parking_count",
+]
+text_features = [
+    "address",
+    "developer",
+    "metro",
+], 
+iterations=200,
+    learning_rate=0.68,
+    depth=3,
+    result: 7.71
+},
+{
+  //suspiciuos
+  categorical = [
+    "region_num",
+    "building_class",
+    // # "metro",
+    "wall_material",
+    "finish_type_count",
+    "free_plan",
+    "developer_group",
+     "address_code",
+]
+numerical = [
+    "metro_time",
+    "floors_max",
+    "total_area",
+    "latitude",
+    "longitude",
+    "flats_count",
+    "parking_count",
+]
+text_features = [
+    "address",
+    "developer",
+    "metro",
+], 
+iterations=50,
+    learning_rate=0.7,
+    depth=3,
+    result: 7.54
+},  {'include_region_num': False, 'include_building_class': True, 'include_wall_material': True, 'include_finish_type_count': True, 'include_free_plan': True, 'include_developer_group': True, 'include_address_code': True, 'include_metro_time': True, 'include_floors_max': True, 'include_total_area': False, 'include_latitude': True, 'include_longitude': True, 'include_flats_count': False, 'include_parking_count': False, 'include_address': True, 'include_developer': False, 'include_metro': False, 'iterations': 386, 'learning_rate': 0.4730146569147585, 'depth': 10},
+{'include_region_num': True, 'include_building_class': True, 'include_wall_material': True, 'include_finish_type_count': True, 'include_free_plan': True, 'include_developer_group': True, 'include_address_code': False, 'include_energy_efficiency': True, 'include_metro_time': True, 'include_floors_max': True, 'include_total_area': False, 'include_latitude': True, 'include_longitude': True, 'include_flats_count': False, 'include_parking_count': True, 'include_address': False, 'include_developer': True, 'include_metro': False, 'iterations': 487, 'learning_rate': 0.3128260296028236, 'depth': 5}
+]

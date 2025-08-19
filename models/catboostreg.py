@@ -8,35 +8,62 @@ from sklearn.metrics import (
 )
 import shap
 
+# {
+#     "params": {
+#         "include_region_num": true,
+#         "include_building_class": true,
+#         "include_wall_material": true,
+#         "include_finish_type_count": true,
+#         "include_free_plan": true,
+#         "include_developer_group": true,
+#         "include_address_code": false,
+#         "include_energy_efficiency": false,
+#         "include_metro_time": false,
+#         "include_floors_max": true,
+#         "include_total_area": false,
+#         "include_latitude": true,
+#         "include_longitude": true,
+#         "include_flats_count": false,
+#         "include_parking_count": false,
+#         "include_inflation": false,
+#         "include_curs": false,
+#         "include_key_rate": false,
+#         "include_address": false,
+#         "include_developer": false,
+#         "include_metro": false,
+#         "iterations": 572,
+#         "learning_rate": 0.04326494913000235,
+#         "depth": 7,
+#     },
+#     "value": 22322.142335307108,
+#     "number": 739,
+# },
 
 categorical = [
     "region_num",
     "building_class",
-    # "wall_material",
-    # "finish_type_count",
+    "wall_material",
+    "finish_type_count",
     # "free_plan",
-    # "developer_group",
-    "address_code",
-    # "energy_efficiency",
+    "developer_group",
+    # "address_code",
+    "energy_efficiency",
 ]
 numerical = [
     "metro_time",
     "floors_max",
-    "total_area",
-    # "latitude",
-    # "longitude",
+    # "total_area",
+    "latitude",
+    "longitude",
     # "flats_count",
-    # "parking_count",
-    "inflation",
-    "curs",
-    "key_rate",
-    # "price_for_sqm_adj",
+    "parking_count",
 ]
 text_features = [
     # "address",
-    # "developer",
-    "metro",
+    "developer",
+    # "metro",
 ]
+
 target_col = "price_for_sqm"
 
 train_df = pd.read_csv("data/train.csv")
@@ -74,9 +101,9 @@ cat_features_idx = [X_train.columns.get_loc(c) for c in categorical]
 text_features_idx = [X_train.columns.get_loc(c) for c in text_features]
 
 model = CatBoostRegressor(
-    iterations=1122,
-    learning_rate=0.44617687687955854,
-    depth=4,
+    iterations=487,
+    learning_rate=0.3128260296028236,
+    depth=5,
     loss_function="RMSE",
     cat_features=cat_features,
     text_features=text_features,
